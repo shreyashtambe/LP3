@@ -1,111 +1,42 @@
     //This is a sample program to implement a fractional knapsack problem
 
-    import java.io.IOException;
+    
+public class LP3_ASS3 {
 
-    import java.util.Scanner;
 
-     
+    public static void main(String[] args) {
+        float sum=0f;
+        int arr[][]= {{10,20,30},{60,100,120}};
+        int w=50;
+        int j=0;
+        while(w>=0){
 
-    class Fractional_Knapsack  
+            float max = 0f;
+            for(int i=0;i<3;i++) {
 
-    {  
+                if (((float) arr[1][i] / (float) arr[0][i]) > max) {
 
-        public static void main(String args[]) throws IOException  
+                    max= (float) arr[1][i] / (float) arr[0][i];
+                    j=i;
+                }
+            }
 
-        {  
+            if(arr[0][j]>w){
+                System.out.println(w*max+" part of "+j + " no is added ");
+                sum += w*max;
+                w=-1;
+            }
+            else{
+                System.out.println(arr[1][j]+" part of "+j + " no is added ");
+                w-=arr[0][j];
+                sum += (float)arr[1][j];
 
-            int i,j=0,max_qty,m,n;  
+                arr[1][j]=0;
+            }
 
-            float sum=0,max;  
 
-            Scanner sc = new Scanner(System.in);
+        }
 
-            int array[][]=new int[2][20];  
-
-            System.out.println("Enter no of items");  
-
-            n=sc.nextInt(); 
-
-     
-
-            System.out.println("Enter the weights of each items");
-
-            for(i=0;i<n;i++)  
-
-                array[0][i]=sc.nextInt();    
-
-     
-
-            System.out.println("Enter the values of each items");
-
-            for(i=0;i<n;i++)  
-
-                array[1][i]=sc.nextInt(); 
-
-     
-
-            System.out.println("Enter maximum volume of knapsack :");  
-
-            max_qty=sc.nextInt();  
-
-     
-
-            m=max_qty;  
-
-            while(m>=0)  
-
-            {  
-
-                max=0;  
-
-                for(i=0;i<n;i++)  
-
-                {  
-
-                    if(((float)array[1][i])/((float)array[0][i])>max)  
-
-                    {  
-
-                        max=((float)array[1][i])/((float)array[0][i]);  
-
-                        j=i;  
-
-                    }  
-
-                }  
-
-                if(array[0][j]>m)  
-
-                {  
-
-                    System.out.println("Quantity of item number: " +  (j+1) + " added is " +m);  
-
-                    sum+=m*max;  
-
-                    m=-1;  
-
-                }  
-
-                else  
-
-                {  
-
-                    System.out.println("Quantity of item number: " + (j+1) + " added is " + array[0][j]);  
-
-                    m-=array[0][j];  
-
-                    sum+=(float)array[1][j];  
-
-                    array[1][j]=0;  
-
-                }  
-
-            }  
-
-            System.out.println("The total profit is " + sum);
-
-            sc.close();
-
-        }  
-
+        System.out.println(sum);
     }
+}
