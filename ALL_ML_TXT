@@ -78,8 +78,8 @@ ______________________________________________________________________
 plt.figure(figsize=(20,12))
 sns.boxplot(data = df)
 ______________________________________________________________________
-df.drop(df[df['Distance']  60].index, inplace = True)
-df.drop(df[df['fare_amount']  0].index, inplace = True)
+df.drop(df[df['Distance'] > 60].index, inplace = True)
+df.drop(df[df['fare_amount'] < 0].index, inplace = True)
 df.drop(df[(df['fare_amount']>100) & (df['Distance']<1)].index, inplace = True )
 df.drop(df[(df['fare_amount']<100) & (df['Distance']>100)].index, inplace = True )
 ______________________________________________________________________
@@ -191,10 +191,403 @@ ______________________________________________________________________
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 
+ml ass 2 email classification
+
+
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC, LinearSVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
+from sklearn import preprocessing
+
+_________________________________________________________________
+
+
+df = pd.read_csv('emails.csv')
+
+_________________________________________________________________
+
+df.info()
+_________________________________________________________________
+df.head()
+_________________________________________________________________
+df.dtypes
+_________________________________________________________________
+df.drop(columns=['Email No.'], inplace=True)
+_________________________________________________________________
+df.isna().sum()
+_________________________________________________________________
+df.describe()
+_________________________________________________________________
+X=df.iloc[:, :df.shape[1]-1] #Independent Variables
+y=df.iloc[:, -1] #Dependent Variable
+X.shape, y.shape
+_________________________________________________________________
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15)
+_________________________________________________________________
+models = {
+"K-Nearest Neighbors": KNeighborsClassifier(n_neighbors=2),
+"Linear SVM":LinearSVC(random_state=8, max_iter=900000),
+"Polynomical SVM":SVC(kernel="poly", degree=2, random_state=8),
+"RBF SVM":SVC(kernel="rbf", random_state=8),
+"Sigmoid SVM":SVC(kernel="sigmoid", random_state=8)
+}
+_________________________________________________________________
+for model_name, model in models.items():
+    y_pred=model.fit(X_train, y_train).predict(X_test)
+    print(f"Accuracy for {model_name} model \t: {metrics.accuracy_score(y_test, y_pred)}")
+_________________________________________________________________
 
 
 
 
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+
+ml ass 3 Given a bank customer, build a neural network-based classifier that can determine whether they will
+leave or not in the next 6 months.
+
+_________________________________________________________________
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.svm import SVC, LinearSVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
+from sklearn import preprocessing
+_________________________________________________________________
+df = pd.read_csv('churn_modelling.csv')
+_________________________________________________________________
+df.info()
+_________________________________________________________________
+df.head()
+_________________________________________________________________
+df.drop(columns=['RowNumber', 'CustomerId', 'Surname'], inplace=True)
+_________________________________________________________________
+df.isna().sum()
+_________________________________________________________________
+df.describe()
+_________________________________________________________________
+X=df.iloc[:, :df.shape[1]-1].values #Independent Variables
+y=df.iloc[:, -1].values #Dependent Variable
+X.shape, y.shape
+_________________________________________________________________
+print(X[:8,1], '... will now become: ')
+label_X_country_encoder = LabelEncoder()
+X[:,1] = label_X_country_encoder.fit_transform(X[:,1])
+print(X[:8,1])
+_________________________________________________________________
+print(X[:6,2], '... will now become: ')
+label_X_gender_encoder = LabelEncoder()
+X[:,2] = label_X_gender_encoder.fit_transform(X[:,2])
+print(X[:6,2])
+_________________________________________________________________
+transform = ColumnTransformer([("countries", OneHotEncoder(), [1])], remainder="passthrough") # 
+X = transform.fit_transform(X)
+X
+_________________________________________________________________
+X = X[:,1:]
+X.shape
+_________________________________________________________________
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+_________________________________________________________________
+sc=StandardScaler()
+X_train[:,np.array([2,4,5,6,7,10])] = sc.fit_transform(X_train[:,np.array([2,4,5,6,7,10])])
+X_test[:,np.array([2,4,5,6,7,10])] = sc.transform(X_test[:,np.array([2,4,5,6,7,10])])
+_________________________________________________________________
+sc=StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+X_train
+ _________________________________________________________________
+ 
+ from tensorflow.keras.models import Sequential
+# Initializing the ANN
+classifier = Sequential()
+_________________________________________________________________
+from tensorflow.keras.layers import Dense
+# The amount of nodes (dimensions) in hidden layer should be the average of input and output lay
+# This adds the input layer (by specifying input dimension) AND the first hidden layer (units)
+classifier.add(Dense(activation = 'relu', input_dim = 11, units=256, kernel_initializer='uniform'))
+_________________________________________________________________
+classifier.add(Dense(activation = 'relu', units=512, kernel_initializer='uniform'))
+classifier.add(Dense(activation = 'relu', units=256, kernel_initializer='uniform'))
+classifier.add(Dense(activation = 'relu', units=128, kernel_initializer='uniform'))
+
+_________________________________________________________________
+# Adding the output layer
+# Notice that we do not need to specify input dim. 
+# we have an output of 1 node, which is the the desired dimensions of our output (stay with the 
+# We use the sigmoid because we want probability outcomes
+classifier.add(Dense(activation = 'sigmoid', units=1, kernel_initializer='uniform'))
+_________________________________________________________________
+# Create optimizer with default learning rate
+# sgd_optimizer = tf.keras.optimizers.SGD()
+# Compile the model
+classifier.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+_________________________________________________________________
+classifier.summary()
+_________________________________________________________________
+
+
+
+
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+ass 4 ml Implement K-Nearest Neighbors algorithm on diabetes.csv dataset. Compute confusion matrix,
+accuracy, error rate, precision and recall on the given dataset.
+
+
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+from sklearn import preprocessing
+_________________________________________________________________
+df = pd.read_csv('diabetes.csv')
+_________________________________________________________________
+df.info()
+_________________________________________________________________
+df.head()
+_________________________________________________________________
+df.corr().style.background_gradient(cmap='BuGn')
+_________________________________________________________________
+df.drop(['BloodPressure', 'SkinThickness'], axis=1, inplace=True)
+_________________________________________________________________
+df.isna().sum()
+_________________________________________________________________
+df.describe()
+_________________________________________________________________
+hist = df.hist(figsize=(20,16))
+_________________________________________________________________
+X=df.iloc[:, :df.shape[1]-1] #Independent Variables
+y=df.iloc[:, -1] #Dependent Variable
+X.shape, y.shape
+_________________________________________________________________
+X=df.iloc[:, :df.shape[1]-1] #Independent Variables
+y=df.iloc[:, -1] #Dependent Variable
+X.shape, y.shape
+_________________________________________________________________
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=8)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+_________________________________________________________________
+def knn(X_train, X_test, y_train, y_test, neighbors, power):
+     model = KNeighborsClassifier(n_neighbors=neighbors, p=power)
+     # Fit and predict on model
+     # Model is trained using the train set and predictions are made based on the test se
+     
+     y_pred=model.fit(X_train, y_train).predict(X_test)
+     print(f"Accuracy for K-Nearest Neighbors model \t: {accuracy_score(y_test, y_pred)}")
+     cm = confusion_matrix(y_test, y_pred)
+     print(f'''Confusion matrix :\n
+     | Positive Prediction\t| Negative Prediction
+     ---------------+------------------------+----------------------
+     Positive Class | True Positive (TP) {cm[0, 0]}\t| False Negative (FN) {cm[0, 1]}
+     ---------------+------------------------+----------------------
+     Negative Class | False Positive (FP) {cm[1, 0]}\t| True Negative (TN) {cm[1, 1]}\n''')
+     
+     cr = classification_report(y_test, y_pred)
+     print('Classification report : \n', cr)
+
+_________________________________________________________________
+param_grid = {
+ 'n_neighbors': range(1, 51),
+ 'p': range(1, 4)
+}
+grid = GridSearchCV(estimator=KNeighborsClassifier(), param_grid=param_grid, cv=5)
+grid.fit(X_train, y_train)
+grid.best_estimator_, grid.best_params_, grid.best_score_
+_________________________________________________________________
+knn(X_train, X_test, y_train, y_test, grid.best_params_['n_neighbors'], grid.best_params_['p'])
+
+
+
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+ass 5 ml Implement K-Means clustering/ hierarchical clustering on sales_data_sample.csv dataset. Determine the
+number of clusters using the elbow method.
+
+_________________________________________________________________
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+#Importing the required libraries.
+_________________________________________________________________
+
+from sklearn.cluster import KMeans, k_means #For clustering
+from sklearn.decomposition import PCA #Linear Dimensionality reduction.
+_________________________________________________________________
+df = pd.read_csv("sales_data_sample.csv", encoding='unicode_escape') #Loading the dataset.
+_________________________________________________________________
+df.head()
+_________________________________________________________________
+
+df.shape 
+
+_________________________________________________________________
+
+df.describe()
+
+_________________________________________________________________
+
+
+df.info()
+
+_________________________________________________________________
+df.isnull().sum()
+_________________________________________________________________
+df.dtypes
+_________________________________________________________________
+df_drop  = ['ADDRESSLINE1', 'ADDRESSLINE2', 'STATUS','POSTALCODE', 'CITY', 'TERRITORY', 'PHONE', 'STATE', 'CONTACTFIRSTNAME', 'CONTACTLASTNAME', 'CUSTOMERNAME', 'ORDERNUMBER']
+df = df.drop(df_drop, axis=1) #Dropping the categorical uneccessary columns along with columns having null values. Can't fill the null values are there are alot of null values.
+_________________________________________________________________
+df.isnull().sum()
+_________________________________________________________________
+df.dtypes
+_________________________________________________________________
+df['COUNTRY'].unique()
+_________________________________________________________________
+df['PRODUCTLINE'].unique()
+_________________________________________________________________
+df['DEALSIZE'].unique()
+_________________________________________________________________
+
+productline = pd.get_dummies(df['PRODUCTLINE']) #Converting the categorical columns. 
+Dealsize = pd.get_dummies(df['DEALSIZE'])
+_________________________________________________________________
+df = pd.concat([df,productline,Dealsize], axis = 1)
+_________________________________________________________________
+
+df_drop  = ['COUNTRY','PRODUCTLINE','DEALSIZE'] #Dropping Country too as there are alot of countries. 
+df = df.drop(df_drop, axis=1)
+_________________________________________________________________
+df['PRODUCTCODE'] = pd.Categorical(df['PRODUCTCODE']).codes #Converting the datatype.
+_________________________________________________________________
+df.drop('ORDERDATE', axis=1, inplace=True) #Dropping the Orderdate as Month is already included.
+_________________________________________________________________
+df.dtypes #All the datatypes are converted into numeric
+_________________________________________________________________
+distortions = [] # Within Cluster Sum of Squares from the centroid
+K = range(1,10)
+for k in K:
+    kmeanModel = KMeans(n_clusters=k)
+    kmeanModel.fit(df)
+    distortions.append(kmeanModel.inertia_)   #Appeding the intertia to the Distortions 
+_________________________________________________________________
+    
+    
+plt.figure(figsize=(16,8))
+plt.plot(K, distortions, 'bx-')
+plt.xlabel('k')
+plt.ylabel('Distortion')
+plt.title('The Elbow Method showing the optimal k')
+plt.show()
+    
+_________________________________________________________________ 
+X_train = df.values #Returns a numpy array.
+_________________________________________________________________    
+X_train.shape    
+_________________________________________________________________    
+ model = KMeans(n_clusters=3,random_state=2) #Number of cluster = 3
+model = model.fit(X_train) #Fitting the values to create a model.
+predictions = model.predict(X_train) #Predicting the cluster values (0,1,or 2)   
+_________________________________________________________________ 
+ unique,counts = np.unique(predictions,return_counts=True)
+_________________________________________________________________ 
+ counts = counts.reshape(1,3)
+ _________________________________________________________________
+ counts_df = pd.DataFrame(counts,columns=['Cluster1','Cluster2','Cluster3'])
+ _________________________________________________________________
+ 
+ counts_df.head()
+ _________________________________________________________________
+ 
+ pca = PCA(n_components=2) #Converting all the features into 2 columns to make it easy to visualize using Principal COmponent Analysis.
+ _________________________________________________________________
+ 
+ reduced_X = pd.DataFrame(pca.fit_transform(X_train),columns=['PCA1','PCA2']) #Creating a DataFrame.
+ 
+ _________________________________________________________________
+ reduced_X.head()
+ _________________________________________________________________
+ 
+ #Plotting the normal Scatter Plot
+plt.figure(figsize=(14,10))
+plt.scatter(reduced_X['PCA1'],reduced_X['PCA2'])
+ 
+ _________________________________________________________________
+ model.cluster_centers_ #Finding the centriods. (3 Centriods in total. Each Array contains a centroids for particular feature )
+ 
+ _________________________________________________________________   
+reduced_centers = pca.transform(model.cluster_centers_) #Transforming the centroids into 3 in x and y coordinates
+ _________________________________________________________________   
+    
+reduced_centers
+_________________________________________________________________  
+plt.figure(figsize=(14,10))
+plt.scatter(reduced_X['PCA1'],reduced_X['PCA2'])
+plt.scatter(reduced_centers[:,0],reduced_centers[:,1],color='black',marker='x',s=300) #Plotting the centriods
+
+_________________________________________________________________
+reduced_X['Clusters'] = predictions #Adding the Clusters to the reduced dataframe.
+_________________________________________________________________
+reduced_X.head()
+_________________________________________________________________
+
+#Plotting the clusters 
+plt.figure(figsize=(14,10))
+ plt.scatter(reduced_X[reduced_X['Clusters'] == 0].loc[:,'PCA1'],reduced_X[reduced_X['Clusters'] == 0].loc[:,'PCA2'],color='slateblue')
+plt.scatter(reduced_X[reduced_X['Clusters'] == 1].loc[:,'PCA1'],reduced_X[reduced_X['Clusters'] == 1].loc[:,'PCA2'],color='springgreen')
+plt.scatter(reduced_X[reduced_X['Clusters'] == 2].loc[:,'PCA1'],reduced_X[reduced_X['Clusters'] == 2].loc[:,'PCA2'],color='indigo')
+plt.scatter(reduced_centers[:,0],reduced_centers[:,1],color='black',marker='x',s=300)
+
+_________________________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
 
